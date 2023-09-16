@@ -741,6 +741,32 @@ void MeshWidget::mousePressEvent(QMouseEvent* e)
             emit _signalEditSceneRight(ComputeRay(e->pos()));
         emit _signalMouseMoveEdit(e);
     }
+
+    if (e->modifiers() & Qt::AltModifier)
+    {
+        const int NB_RAYS_TO_GENERATE = 5;
+
+        //Radius of the circle within which rays are going to
+        //be generated. This is in pixels
+        const int CIRCLE_RADIUS = 50;
+
+        std::vector<Ray> rays;
+        rays.reserve(NB_RAYS_TO_GENERATE);
+
+        for (int i = 0; i < NB_RAYS_TO_GENERATE; i++)
+        {
+            QPoint random_pos = e->pos();
+
+            int rand_x = (std::rand() / (float)RAND_MAX) * CIRCLE_RADIUS * 2 - CIRCLE_RADIUS;
+            int rand_y = (std::rand() / (float)RAND_MAX) * CIRCLE_RADIUS * 2 - CIRCLE_RADIUS;
+            random_pos.setX(random_pos.x() + rand_x);
+            random_pos.setY(random_pos.y() + rand_y);
+
+            rays.push_back(ComputeRay(random_pos));
+        }
+
+        emit _signalPaintErosion(rays);
+    }
 }
 
 /*!
@@ -800,6 +826,7 @@ void MeshWidget::mouseMoveEvent(QMouseEvent* e)
 
         emit _signalMouseMove(e);
     }
+
     if (e->modifiers() & Qt::ShiftModifier)
     {
         emit _signalMouseMoveEdit(e);

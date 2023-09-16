@@ -6,9 +6,10 @@
 // Ray class
 class Ray
 {
-protected:
-  Vector c; //!< Origin of the ray.
-  Vector n; //!< Direction.
+public:
+    Vector _origin; //!< Origin of the ray.
+    Vector _direction; //!< Direction.
+
 public:
   //! Empty.
   Ray() {}
@@ -39,8 +40,8 @@ Ray ray(Vector(0.0,0.0,0.0),Normalized(Vector(2.0,-1.0,3.0)));
 */
 inline Ray::Ray(const Vector& p, const Vector& d)
 {
-  c = p;
-  n = d;
+  _origin = p;
+  _direction = d;
 }
 
 /*!
@@ -48,7 +49,7 @@ inline Ray::Ray(const Vector& p, const Vector& d)
 */
 inline Vector Ray::Origin() const
 {
-  return c;
+  return _origin;
 }
 
 /*!
@@ -56,7 +57,7 @@ inline Vector Ray::Origin() const
 */
 inline Vector Ray::Direction() const
 {
-  return n;
+  return _direction;
 }
 
 /*!
@@ -65,7 +66,7 @@ inline Vector Ray::Direction() const
 */
 inline Vector Ray::operator()(double t) const
 {
-  return c + t * n;
+  return _origin + t * _direction;
 }
 
 #endif

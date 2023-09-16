@@ -20,7 +20,7 @@ intersection point.
 */
 Ray Ray::Reflect(const Vector& p, const Vector& normal)
 {
-  return Ray(p, n - 2.0 * normal * (n * normal));
+    return Ray(p, _direction - 2.0 * normal * (_direction * normal));
 }
 
 /*!
@@ -31,6 +31,6 @@ Ray Ray::Reflect(const Vector& p, const Vector& normal)
 */
 std::ostream& operator<<(std::ostream& s, const Ray& ray)
 {
-  s << "Ray(" << ray.c << ',' << ray.n << ')';
+    s << "Ray(" << ray._origin << ',' << ray._direction << ')';
   return s;
 }

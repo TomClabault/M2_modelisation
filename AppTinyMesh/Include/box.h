@@ -103,7 +103,7 @@ inline Vector Box::Size() const
 */
 inline double Box::Radius() const
 {
-  return 0.5 * Norm(b - a);
+  return 0.5 * length(b - a);
 }
 
 /*!

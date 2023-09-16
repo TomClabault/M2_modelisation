@@ -42,11 +42,6 @@ Alternatively, some geometric classes implement bilinear interpolation,
 such as Quadrangle::Vertex().
 */
 
-const Vector Vector::Null = Vector(0.0, 0.0, 0.0);
-const Vector Vector::X = Vector(1.0, 0.0, 0.0);
-const Vector Vector::Y = Vector(0.0, 1.0, 0.0);
-const Vector Vector::Z = Vector(0.0, 0.0, 1.0);
-
 /*!
 \brief Normalize a vector, computing the inverse of its norm and scaling
 the components.
@@ -56,7 +51,7 @@ which might resulting in errors.
 */
 void Normalize(Vector& u)
 {
-  u *= 1.0 / Norm(u);
+  u *= 1.0 / length(u);
 }
 
 /*!
@@ -93,8 +88,8 @@ Vector Vector::Orthogonal() const
     }
   }
   a = Vector::Null;
-  a[i] = c[j];
-  a[j] = -c[i];
+  a[i] = this->operator()(j);
+  a[j] = -this->operator()(i);
   return a;
 }
 
@@ -103,11 +98,11 @@ Vector Vector::Orthogonal() const
 \param u Vector.
 \param s Stream.
 */
-std::ostream& operator<<(std::ostream& s, const Vector& u)
-{
-  s << "Vector(" << u.c[0] << ',' << u.c[1] << ',' << u.c[2] << ')';
-  return s;
-}
+//std::ostream& operator<<(std::ostream& s, const Vector& u)
+//{
+//  s << "Vector(" << u[0] << ',' << u[1] << ',' << u[2] << ')';
+//  return s;
+//}
 
 /*!
 \brief Given a vector, creates two vectors xand y that form an orthogonal basis.

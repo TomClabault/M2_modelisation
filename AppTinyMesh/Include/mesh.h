@@ -1,69 +1,20 @@
 #pragma once
 
+#include "AppTinyMesh/Source/bvh.h"
 #include "box.h"
 #include "ray.h"
 #include "mathematics.h"
 
-// Triangle
-class Triangle
-{
-protected:
-  Vector p[3] = {Vector(0.0,0.0,0.0),Vector(1.0,0.0,0.0), Vector(0.0,1.0,0.0), }; //!< Array of vertices.
-public:
-  //! Empty.
-  Triangle() {}
-  explicit Triangle(const Vector&, const Vector&, const Vector&);
-
-  //! Empty.
-  ~Triangle() {}
-
-  Vector operator[] (int) const;
-
-  // Point in triangle
-  Vector Vertex(double, double) const;
-
-  // Intersection
-  bool Intersect(const Ray&, double&, double&, double&) const;
-
-  void Translate(const Vector&);
-
-  // Geometry
-  Vector Normal() const;
-  Vector AreaNormal() const;
-  Vector Center() const;
-
-  double Area() const;
-  double Aspect() const;
-  Box GetBox() const;
-
-  // Stream
-  friend std::ostream& operator<<(std::ostream&, const Triangle&);
-
-  double InscribedRadius() const;
-  double CircumscribedRadius() const;
-protected:
-  static double epsilon; //!< Internal epsilon constant.
-};
-
-/*!
-\brief Return the i-th vertex.
-\param i Index.
-*/
-inline Vector Triangle::operator[] (int i) const
-{
-  return p[i];
-}
-
 //! Compute the barycenter of the triangle.
 inline Vector Triangle::Center() const
 {
-  return (p[0] + p[1] + p[2]) / 3.0;
+    return (p[0] + p[1] + p[2]) / 3.0;
 }
 
 //! Compute the area of the triangle.
 inline double Triangle::Area() const
 {
-  return 0.5 * Norm((p[0] - p[1]) / (p[2] - p[0]));
+    return 0.5 * Norm((p[0] - p[1]) / (p[2] - p[0]));
 }
 
 /*!
@@ -72,9 +23,11 @@ inline double Triangle::Area() const
 */
 inline Triangle::Triangle(const Vector& a, const Vector& b, const Vector& c)
 {
-  p[0] = a;
-  p[1] = b;
-  p[2] = c;
+    p[0] = a;
+    p[1] = b;
+    p[2] = c;
+
+    _face_normal = (b-a) / (c-a);
 }
 
 
@@ -83,51 +36,57 @@ class QString;
 class Mesh
 {
 protected:
-  std::vector<Vector> vertices; //!< Vertices.
-  std::vector<Vector> normals;  //!< Normals.
-  std::vector<int> varray;     //!< Vertex indexes.
-  std::vector<int> narray;     //!< Normal indexes.
+    std::vector<Vector> m_vertices; //!< Vertices.
+    std::vector<Vector> m_normals;  //!< Normals.
+    std::vector<int> m_varray;     //!< Vertex indexes.
+    std::vector<int> m_narray;     //!< Normal indexes.
+
+    //Dynamically allocated triangles for the BVH
+    std::vector<Triangle>* m_triangles;
+    BVH* m_bvh;
 public:
-  explicit Mesh();
-  explicit Mesh(const std::vector<Vector>&, const std::vector<int>&);
-  explicit Mesh(const std::vector<Vector>&, const std::vector<Vector>&, const std::vector<int>&, const std::vector<int>&);
-  ~Mesh();
+    explicit Mesh();
+    explicit Mesh(const std::vector<Vector>&, const std::vector<int>&);
+    explicit Mesh(const std::vector<Vector>& vertices, const std::vector<Vector>& normals, const std::vector<int>& va, const std::vector<int>& na);
+    ~Mesh();
 
-  void Reserve(int, int, int, int);
+    void Reserve(int, int, int, int);
 
-  Triangle GetTriangle(int) const;
-  Vector Vertex(int) const;
-  Vector Vertex(int, int) const;
+    Triangle GetTriangle(int) const;
+    Vector Vertex(int) const;
+    Vector Vertex(int, int) const;
 
-  Vector Normal(int) const;
+    Vector Normal(int) const;
 
-  int Triangles() const;
-  int Vertexes() const;
+    int Triangles() const;
+    int Vertexes() const;
 
-  std::vector<int> VertexIndexes() const;
-  std::vector<int> NormalIndexes() const;
+    std::vector<int> VertexIndexes() const;
+    std::vector<int> NormalIndexes() const;
 
-  int VertexIndex(int, int) const;
-  int NormalIndex(int, int) const;
+    int VertexIndex(int, int) const;
+    int NormalIndex(int, int) const;
 
-  Vector operator[](int) const;
+    Vector intersect(const Ray& ray) const;
 
-  Box GetBox() const;
+    Vector operator[](int) const;
 
-  void Scale(double);
+    Box GetBox() const;
 
-  void SmoothNormals();
+    void Scale(double);
 
-  // Constructors from core classes
-  explicit Mesh(const Box&);
+    void SmoothNormals();
 
-  void Load(const QString&);
-  void SaveObj(const QString&, const QString&) const;
+    // Constructors from core classes
+    explicit Mesh(const Box&);
+
+    void Load(const QString&);
+    void SaveObj(const QString&, const QString&) const;
 protected:
-  void AddTriangle(int, int, int, int);
-  void AddSmoothTriangle(int, int, int, int, int, int);
-  void AddSmoothQuadrangle(int, int, int, int, int, int, int, int);
-  void AddQuadrangle(int, int, int, int);
+    void AddTriangle(int, int, int, int);
+    void AddSmoothTriangle(int, int, int, int, int, int);
+    void AddSmoothQuadrangle(int, int, int, int, int, int, int, int);
+    void AddQuadrangle(int, int, int, int);
 };
 
 /*!
@@ -135,7 +94,7 @@ protected:
 */
 inline std::vector<int> Mesh::VertexIndexes() const
 {
-  return varray;
+    return m_varray;
 }
 
 /*!
@@ -143,7 +102,7 @@ inline std::vector<int> Mesh::VertexIndexes() const
 */
 inline std::vector<int> Mesh::NormalIndexes() const
 {
-  return narray;
+    return m_narray;
 }
 
 /*!
@@ -153,7 +112,7 @@ inline std::vector<int> Mesh::NormalIndexes() const
 */
 inline int Mesh::VertexIndex(int t, int i) const
 {
-  return varray.at(t * 3 + i);
+    return m_varray.at(t * 3 + i);
 }
 
 /*!
@@ -163,7 +122,7 @@ inline int Mesh::VertexIndex(int t, int i) const
 */
 inline int Mesh::NormalIndex(int t, int i) const
 {
-  return narray.at(t * 3 + i);
+    return m_narray.at(t * 3 + i);
 }
 
 /*!
@@ -173,7 +132,7 @@ inline int Mesh::NormalIndex(int t, int i) const
 */
 inline Triangle Mesh::GetTriangle(int i) const
 {
-  return Triangle(vertices.at(varray.at(i * 3 + 0)), vertices.at(varray.at(i * 3 + 1)), vertices.at(varray.at(i * 3 + 2)));
+    return Triangle(m_vertices.at(m_varray.at(i * 3 + 0)), m_vertices.at(m_varray.at(i * 3 + 1)), m_vertices.at(m_varray.at(i * 3 + 2)));
 }
 
 /*!
@@ -183,7 +142,7 @@ inline Triangle Mesh::GetTriangle(int i) const
 */
 inline Vector Mesh::Vertex(int i) const
 {
-  return vertices[i];
+    return m_vertices[i];
 }
 
 /*!
@@ -194,7 +153,7 @@ inline Vector Mesh::Vertex(int i) const
 */
 inline Vector Mesh::Vertex(int t, int v) const
 {
-  return vertices[varray[t * 3 + v]];
+    return m_vertices[m_varray[t * 3 + v]];
 }
 
 /*!
@@ -203,7 +162,7 @@ inline Vector Mesh::Vertex(int t, int v) const
 */
 inline int Mesh::Vertexes() const
 {
-  return int(vertices.size());
+    return int(m_vertices.size());
 }
 
 /*!
@@ -213,7 +172,7 @@ inline int Mesh::Vertexes() const
 */
 inline Vector Mesh::Normal(int i) const
 {
-  return normals[i];
+    return m_normals[i];
 }
 
 /*!
@@ -221,7 +180,7 @@ inline Vector Mesh::Normal(int i) const
 */
 inline int Mesh::Triangles() const
 {
-  return int(varray.size()) / 3;
+    return int(m_varray.size()) / 3;
 }
 
 /*!
@@ -232,6 +191,6 @@ inline int Mesh::Triangles() const
 */
 inline Vector Mesh::operator[](int i) const
 {
-  return vertices[i];
+    return m_vertices[i];
 }
 

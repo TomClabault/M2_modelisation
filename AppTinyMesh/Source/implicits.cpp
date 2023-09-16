@@ -15,7 +15,7 @@ AnalyticScalarField::AnalyticScalarField()
 */
 double AnalyticScalarField::Value(const Vector& p) const
 {
-  return Norm(p) - 1.0;
+    return Norm(p) - 1.0;
 }
 
 /*!
@@ -28,217 +28,224 @@ double AnalyticScalarField::Value(const Vector& p) const
 */
 void AnalyticScalarField::Polygonize(int n, Mesh& g, const Box& box, const double& epsilon) const
 {
-  std::vector<Vector> vertex;
-  std::vector<Vector> normal;
+    std::function<float(const Vector& point)> function = std::bind(&AnalyticScalarField::Value, this, std::placeholders::_1);
+    AnalyticScalarField::Polygonize_from_function(function, n, g, box, epsilon);
+}
 
-  std::vector<int> triangle;
+void AnalyticScalarField::Polygonize_from_function(std::function<float(const Vector& point)> value_function, int n, Mesh& output_mesh, const Box& box, const double& epsilon)
+{
+    std::vector<Vector> vertex;
+    std::vector<Vector> normal;
 
-  vertex.reserve(20000);
-  normal.reserve(20000);
-  triangle.reserve(20000);
+    std::vector<int> triangle;
 
-  int nv = 0;
-  const int nx = n;
-  const int ny = n;
-  const int nz = n;
+    vertex.reserve(20000);
+    normal.reserve(20000);
+    triangle.reserve(20000);
 
-  Box clipped = box;
+    int nv = 0;
+    const int nx = n;
+    const int ny = n;
+    const int nz = n;
 
-  // Clamped integer values
-  const int nax = 0;
-  const int nbx = nx;
-  const int nay = 0;
-  const int nby = ny;
-  const int naz = 0;
-  const int nbz = nz;
+    Box clipped = box;
 
-  const int size = nx * ny;
+    // Clamped integer values
+    const int nax = 0;
+    const int nbx = nx;
+    const int nay = 0;
+    const int nby = ny;
+    const int naz = 0;
+    const int nbz = nz;
 
-  // Intensities
-  double* a = new double[size];
-  double* b = new double[size];
+    const int size = nx * ny;
 
-  // Vertex
-  Vector* u = new Vector[size];
-  Vector* v = new Vector[size];
+    // Intensities
+    double* a = new double[size];
+    double* b = new double[size];
 
-  // Edges
-  int* eax = new int[size];
-  int* eay = new int[size];
-  int* ebx = new int[size];
-  int* eby = new int[size];
-  int* ez = new int[size];
+    // Vertex
+    Vector* u = new Vector[size];
+    Vector* v = new Vector[size];
 
-  // Diagonal of a cell
-  Vector d = clipped.Diagonal() / (n - 1);
+    // Edges
+    int* eax = new int[size];
+    int* eay = new int[size];
+    int* ebx = new int[size];
+    int* eby = new int[size];
+    int* ez = new int[size];
 
-  double za = 0.0;
+    // Diagonal of a cell
+    Vector d = clipped.Diagonal() / (n - 1);
 
-  // Compute field inside lower Oxy plane
-  for (int i = nax; i < nbx; i++)
-  {
-    for (int j = nay; j < nby; j++)
-    {
-      u[i * ny + j] = clipped[0] + Vector(i * d[0], j * d[1], za);
-      a[i * ny + j] = Value(u[i * ny + j]);
-    }
-  }
+    double za = 0.0;
 
-  // Compute straddling edges inside lower Oxy plane
-  for (int i = nax; i < nbx - 1; i++)
-  {
-    for (int j = nay; j < nby; j++)
-    {
-      // We need a xor b, which can be implemented a == !b 
-      if (!((a[i * ny + j] < 0.0) == !(a[(i + 1) * ny + j] >= 0.0)))
-      {
-        vertex.push_back(Dichotomy(u[i * ny + j], u[(i + 1) * ny + j], a[i * ny + j], a[(i + 1) * ny + j], d[0], epsilon));
-        normal.push_back(Normal(vertex.back()));
-        eax[i * ny + j] = nv;
-        nv++;
-      }
-    }
-  }
-  for (int i = nax; i < nbx; i++)
-  {
-    for (int j = nay; j < nby - 1; j++)
-    {
-      if (!((a[i * ny + j] < 0.0) == !(a[i * ny + (j + 1)] >= 0.0)))
-      {
-        vertex.push_back(Dichotomy(u[i * ny + j], u[i * ny + (j + 1)], a[i * ny + j], a[i * ny + (j + 1)], d[1], epsilon));
-        normal.push_back(Normal(vertex.back()));
-        eay[i * ny + j] = nv;
-        nv++;
-      }
-    }
-  }
-
-  // Array for edge vertices
-  int e[12];
-
-  // For all layers
-  for (int k = naz; k < nbz; k++)
-  {
-    double zb = za + d[2];
+    // Compute field inside lower Oxy plane
     for (int i = nax; i < nbx; i++)
     {
-      for (int j = nay; j < nby; j++)
-      {
-        v[i * ny + j] = clipped[0] + Vector(i * d[0], j * d[1], zb);
-        b[i * ny + j] = Value(v[i * ny + j]);
-      }
+        for (int j = nay; j < nby; j++)
+        {
+            u[i * ny + j] = clipped[0] + Vector(i * d[0], j * d[1], za);
+            a[i * ny + j] = value_function(u[i * ny + j]);
+        }
     }
 
     // Compute straddling edges inside lower Oxy plane
     for (int i = nax; i < nbx - 1; i++)
     {
-      for (int j = nay; j < nby; j++)
-      {
-        //   if (((b[i*ny + j] < 0.0) && (b[(i + 1)*ny + j] >= 0.0)) || ((b[i*ny + j] >= 0.0) && (b[(i + 1)*ny + j] < 0.0)))
-        if (!((b[i * ny + j] < 0.0) == !(b[(i + 1) * ny + j] >= 0.0)))
+        for (int j = nay; j < nby; j++)
         {
-          vertex.push_back(Dichotomy(v[i * ny + j], v[(i + 1) * ny + j], b[i * ny + j], b[(i + 1) * ny + j], d[0], epsilon));
-          normal.push_back(Normal(vertex.back()));
-          ebx[i * ny + j] = nv;
-          nv++;
+            // We need a xor b, which can be implemented a == !b
+            if (!((a[i * ny + j] < 0.0) == !(a[(i + 1) * ny + j] >= 0.0)))
+            {
+                vertex.push_back(AnalyticScalarField::Dichotomy(u[i * ny + j], u[(i + 1) * ny + j], a[i * ny + j], a[(i + 1) * ny + j], d[0], value_function, epsilon));
+                normal.push_back(AnalyticScalarField::Normal(vertex.back(), value_function));
+                eax[i * ny + j] = nv;
+                nv++;
+            }
         }
-      }
     }
-
     for (int i = nax; i < nbx; i++)
     {
-      for (int j = nay; j < nby - 1; j++)
-      {
-        // if (((b[i*ny + j] < 0.0) && (b[i*ny + (j + 1)] >= 0.0)) || ((b[i*ny + j] >= 0.0) && (b[i*ny + (j + 1)] < 0.0)))
-        if (!((b[i * ny + j] < 0.0) == !(b[i * ny + (j + 1)] >= 0.0)))
+        for (int j = nay; j < nby - 1; j++)
         {
-          vertex.push_back(Dichotomy(v[i * ny + j], v[i * ny + (j + 1)], b[i * ny + j], b[i * ny + (j + 1)], d[1], epsilon));
-          normal.push_back(Normal(vertex.back()));
-          eby[i * ny + j] = nv;
-          nv++;
+            if (!((a[i * ny + j] < 0.0) == !(a[i * ny + (j + 1)] >= 0.0)))
+            {
+                vertex.push_back(AnalyticScalarField::Dichotomy(u[i * ny + j], u[i * ny + (j + 1)], a[i * ny + j], a[i * ny + (j + 1)], d[1], value_function, epsilon));
+                normal.push_back(AnalyticScalarField::Normal(vertex.back(), value_function));
+                eay[i * ny + j] = nv;
+                nv++;
+            }
         }
-      }
     }
 
-    // Create vertical straddling edges
-    for (int i = nax; i < nbx; i++)
+    // Array for edge vertices
+    int e[12];
+
+    // For all layers
+    for (int k = naz; k < nbz; k++)
     {
-      for (int j = nay; j < nby; j++)
-      {
-        // if ((a[i*ny + j] < 0.0) && (b[i*ny + j] >= 0.0) || (a[i*ny + j] >= 0.0) && (b[i*ny + j] < 0.0))
-        if (!((a[i * ny + j] < 0.0) == !(b[i * ny + j] >= 0.0)))
+        double zb = za + d[2];
+        for (int i = nax; i < nbx; i++)
         {
-          vertex.push_back(Dichotomy(u[i * ny + j], v[i * ny + j], a[i * ny + j], b[i * ny + j], d[2], epsilon));
-          normal.push_back(Normal(vertex.back()));
-          ez[i * ny + j] = nv;
-          nv++;
+            for (int j = nay; j < nby; j++)
+            {
+                v[i * ny + j] = clipped[0] + Vector(i * d[0], j * d[1], zb);
+                b[i * ny + j] = value_function(v[i * ny + j]);
+            }
         }
-      }
+
+        // Compute straddling edges inside lower Oxy plane
+        for (int i = nax; i < nbx - 1; i++)
+        {
+            for (int j = nay; j < nby; j++)
+            {
+                //   if (((b[i*ny + j] < 0.0) && (b[(i + 1)*ny + j] >= 0.0)) || ((b[i*ny + j] >= 0.0) && (b[(i + 1)*ny + j] < 0.0)))
+                if (!((b[i * ny + j] < 0.0) == !(b[(i + 1) * ny + j] >= 0.0)))
+                {
+                    vertex.push_back(AnalyticScalarField::Dichotomy(v[i * ny + j], v[(i + 1) * ny + j], b[i * ny + j], b[(i + 1) * ny + j], d[0], value_function, epsilon));
+                    normal.push_back(AnalyticScalarField::Normal(vertex.back(), value_function));
+                    ebx[i * ny + j] = nv;
+                    nv++;
+                }
+            }
+        }
+
+        for (int i = nax; i < nbx; i++)
+        {
+            for (int j = nay; j < nby - 1; j++)
+            {
+                // if (((b[i*ny + j] < 0.0) && (b[i*ny + (j + 1)] >= 0.0)) || ((b[i*ny + j] >= 0.0) && (b[i*ny + (j + 1)] < 0.0)))
+                if (!((b[i * ny + j] < 0.0) == !(b[i * ny + (j + 1)] >= 0.0)))
+                {
+                    vertex.push_back(AnalyticScalarField::Dichotomy(v[i * ny + j], v[i * ny + (j + 1)], b[i * ny + j], b[i * ny + (j + 1)], d[1], value_function, epsilon));
+                    normal.push_back(AnalyticScalarField::Normal(vertex.back(), value_function));
+                    eby[i * ny + j] = nv;
+                    nv++;
+                }
+            }
+        }
+
+        // Create vertical straddling edges
+        for (int i = nax; i < nbx; i++)
+        {
+            for (int j = nay; j < nby; j++)
+            {
+                // if ((a[i*ny + j] < 0.0) && (b[i*ny + j] >= 0.0) || (a[i*ny + j] >= 0.0) && (b[i*ny + j] < 0.0))
+                if (!((a[i * ny + j] < 0.0) == !(b[i * ny + j] >= 0.0)))
+                {
+                    vertex.push_back(AnalyticScalarField::Dichotomy(u[i * ny + j], v[i * ny + j], a[i * ny + j], b[i * ny + j], d[2], value_function, epsilon));
+                    normal.push_back(AnalyticScalarField::Normal(vertex.back(), value_function));
+                    ez[i * ny + j] = nv;
+                    nv++;
+                }
+            }
+        }
+
+        // Create mesh
+        for (int i = nax; i < nbx - 1; i++)
+        {
+            for (int j = nay; j < nby - 1; j++)
+            {
+                int cubeindex = 0;
+                if (a[i * ny + j] < 0.0)       cubeindex |= 1;
+                if (a[(i + 1) * ny + j] < 0.0)   cubeindex |= 2;
+                if (a[i * ny + j + 1] < 0.0)     cubeindex |= 4;
+                if (a[(i + 1) * ny + j + 1] < 0.0) cubeindex |= 8;
+                if (b[i * ny + j] < 0.0)       cubeindex |= 16;
+                if (b[(i + 1) * ny + j] < 0.0)   cubeindex |= 32;
+                if (b[i * ny + j + 1] < 0.0)     cubeindex |= 64;
+                if (b[(i + 1) * ny + j + 1] < 0.0) cubeindex |= 128;
+
+                // Cube is straddling the surface
+                if ((cubeindex != 255) && (cubeindex != 0))
+                {
+                    e[0] = eax[i * ny + j];
+                    e[1] = eax[i * ny + (j + 1)];
+                    e[2] = ebx[i * ny + j];
+                    e[3] = ebx[i * ny + (j + 1)];
+                    e[4] = eay[i * ny + j];
+                    e[5] = eay[(i + 1) * ny + j];
+                    e[6] = eby[i * ny + j];
+                    e[7] = eby[(i + 1) * ny + j];
+                    e[8] = ez[i * ny + j];
+                    e[9] = ez[(i + 1) * ny + j];
+                    e[10] = ez[i * ny + (j + 1)];
+                    e[11] = ez[(i + 1) * ny + (j + 1)];
+
+                    for (int h = 0; TriangleTable[cubeindex][h] != -1; h += 3)
+                    {
+                        triangle.push_back(e[TriangleTable[cubeindex][h + 0]]);
+                        triangle.push_back(e[TriangleTable[cubeindex][h + 1]]);
+                        triangle.push_back(e[TriangleTable[cubeindex][h + 2]]);
+                    }
+                }
+            }
+        }
+
+        std::swap(a, b);
+
+        za = zb;
+        std::swap(eax, ebx);
+        std::swap(eay, eby);
+        std::swap(u, v);
     }
 
-    // Create mesh
-    for (int i = nax; i < nbx - 1; i++)
-    {
-      for (int j = nay; j < nby - 1; j++)
-      {
-        int cubeindex = 0;
-        if (a[i * ny + j] < 0.0)       cubeindex |= 1;
-        if (a[(i + 1) * ny + j] < 0.0)   cubeindex |= 2;
-        if (a[i * ny + j + 1] < 0.0)     cubeindex |= 4;
-        if (a[(i + 1) * ny + j + 1] < 0.0) cubeindex |= 8;
-        if (b[i * ny + j] < 0.0)       cubeindex |= 16;
-        if (b[(i + 1) * ny + j] < 0.0)   cubeindex |= 32;
-        if (b[i * ny + j + 1] < 0.0)     cubeindex |= 64;
-        if (b[(i + 1) * ny + j + 1] < 0.0) cubeindex |= 128;
+    delete[]a;
+    delete[]b;
+    delete[]u;
+    delete[]v;
 
-        // Cube is straddling the surface
-        if ((cubeindex != 255) && (cubeindex != 0))
-        {
-          e[0] = eax[i * ny + j];
-          e[1] = eax[i * ny + (j + 1)];
-          e[2] = ebx[i * ny + j];
-          e[3] = ebx[i * ny + (j + 1)];
-          e[4] = eay[i * ny + j];
-          e[5] = eay[(i + 1) * ny + j];
-          e[6] = eby[i * ny + j];
-          e[7] = eby[(i + 1) * ny + j];
-          e[8] = ez[i * ny + j];
-          e[9] = ez[(i + 1) * ny + j];
-          e[10] = ez[i * ny + (j + 1)];
-          e[11] = ez[(i + 1) * ny + (j + 1)];
+    delete[]eax;
+    delete[]eay;
+    delete[]ebx;
+    delete[]eby;
+    delete[]ez;
 
-          for (int h = 0; TriangleTable[cubeindex][h] != -1; h += 3)
-          {
-            triangle.push_back(e[TriangleTable[cubeindex][h + 0]]);
-            triangle.push_back(e[TriangleTable[cubeindex][h + 1]]);
-            triangle.push_back(e[TriangleTable[cubeindex][h + 2]]);
-          }
-        }
-      }
-    }
+    std::vector<int> normals = triangle;
 
-    std::swap(a, b);
-
-    za = zb;
-    std::swap(eax, ebx);
-    std::swap(eay, eby);
-    std::swap(u, v);
-  }
-
-  delete[]a;
-  delete[]b;
-  delete[]u;
-  delete[]v;
-
-  delete[]eax;
-  delete[]eay;
-  delete[]ebx;
-  delete[]eby;
-  delete[]ez;
-
-  std::vector<int> normals = triangle;
-
-  g = Mesh(vertex, normal, triangle, normals);
+    //Mesh new_mesh = Mesh(vertex, normal, triangle, normals);
+    output_mesh = Mesh(vertex, normal, triangle, normals);
 }
 
 /*!
@@ -250,7 +257,7 @@ void AnalyticScalarField::Polygonize(int n, Mesh& g, const Box& box, const doubl
 \param epsilon Precision.
 \return Point on the implicit surface.
 */
-Vector AnalyticScalarField::Dichotomy(Vector a, Vector b, double va, double vb, double length, const double& epsilon) const
+Vector AnalyticScalarField::Dichotomy(Vector a, Vector b, double va, double vb, double length, const std::function<float(const Vector& point)>& value_function, const double& epsilon)
 {
   int ia = va > 0.0 ? 1 : -1;
 
@@ -259,7 +266,7 @@ Vector AnalyticScalarField::Dichotomy(Vector a, Vector b, double va, double vb, 
 
   while (length > epsilon)
   {
-    double vc = Value(c);
+    double vc = value_function(c);
     int ic = vc > 0.0 ? 1 : -1;
     if (ia + ic == 0)
     {
@@ -281,11 +288,11 @@ Vector AnalyticScalarField::Dichotomy(Vector a, Vector b, double va, double vb, 
 \brief Compute the gradient of the field.
 \param p Point.
 */
-Vector AnalyticScalarField::Gradient(const Vector& p) const
+Vector AnalyticScalarField::Gradient(const Vector& p, const std::function<float(const Vector& point)>& value_function)
 {
-  double x = Value(Vector(p[0] + Epsilon, p[1], p[2])) - Value(Vector(p[0] - Epsilon, p[1], p[2]));
-  double y = Value(Vector(p[0], p[1] + Epsilon, p[2])) - Value(Vector(p[0], p[1] - Epsilon, p[2]));
-  double z = Value(Vector(p[0], p[1], p[2] + Epsilon)) - Value(Vector(p[0], p[1], p[2] - Epsilon));
+  double x = value_function(Vector(p[0] + Epsilon, p[1], p[2])) - value_function(Vector(p[0] - Epsilon, p[1], p[2]));
+  double y = value_function(Vector(p[0], p[1] + Epsilon, p[2])) - value_function(Vector(p[0], p[1] - Epsilon, p[2]));
+  double z = value_function(Vector(p[0], p[1], p[2] + Epsilon)) - value_function(Vector(p[0], p[1], p[2] - Epsilon));
 
   return Vector(x, y, z) * (0.5 / Epsilon);
 }
@@ -297,9 +304,9 @@ Vector AnalyticScalarField::Gradient(const Vector& p) const
 
 \param p Point (should be on the surface).
 */
-Vector AnalyticScalarField::Normal(const Vector& p) const
+Vector AnalyticScalarField::Normal(const Vector& p, const std::function<float(const Vector& point)>& value_function)
 {
-  Vector normal = Normalized(Gradient(p));
+  Vector normal = Normalized(AnalyticScalarField::Gradient(p, value_function));
 
   return normal;
 }

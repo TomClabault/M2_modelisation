@@ -15,6 +15,7 @@ MeshColor::MeshColor()
 */
 MeshColor::MeshColor(const Mesh& m, const std::vector<Color>& cols, const std::vector<int>& carr) : Mesh(m), colors(cols), carray(carr)
 {
+
 }
 
 /*!
@@ -23,8 +24,8 @@ MeshColor::MeshColor(const Mesh& m, const std::vector<Color>& cols, const std::v
 */
 MeshColor::MeshColor(const Mesh& m) : Mesh(m)
 {
-	colors.resize(vertices.size(), Color(1.0, 1.0, 1.0));
-	carray = varray;
+    colors.resize(m_vertices.size(), Color(1.0, 1.0, 1.0));
+	carray = m_varray;
 }
 
 /*!
@@ -32,4 +33,5 @@ MeshColor::MeshColor(const Mesh& m) : Mesh(m)
 */
 MeshColor::~MeshColor()
 {
+    //delete m_bvh;
 }
