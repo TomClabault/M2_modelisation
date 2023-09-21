@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SDF.h"
 #include "bvh.h"
 #include "box.h"
 #include "ray.h"
@@ -44,11 +45,14 @@ protected:
     //Dynamically allocated triangles for the BVH
     std::vector<Triangle>* m_triangles;
     BVH* m_bvh;
+    SDF* m_sdf;
 public:
     explicit Mesh();
     explicit Mesh(const std::vector<Vector>&, const std::vector<int>&);
     explicit Mesh(const std::vector<Vector>& vertices, const std::vector<Vector>& normals, const std::vector<int>& va, const std::vector<int>& na);
     ~Mesh();
+
+    void set_corresponding_sdf(SDF* sdf);
 
     void Reserve(int, int, int, int);
 
@@ -68,6 +72,7 @@ public:
     int NormalIndex(int, int) const;
 
     Vector intersect(const Ray& ray) const;
+    Vector intersectRayMarching(SDF* sdf, const Ray& ray, const float step_size = 0.03f, const int max_steps = 500, const float distance_to_stop = 100) const;
 
     Vector operator[](int) const;
 
@@ -82,6 +87,7 @@ public:
 
     void Load(const QString&);
     void SaveObj(const QString&, const QString&) const;
+
 protected:
     void AddTriangle(int, int, int, int);
     void AddSmoothTriangle(int, int, int, int, int, int);

@@ -1,16 +1,14 @@
 #include "SDFDifference.h"
-#include "SDFIntersection.h"
 #include "SDFSmoothDifference.h"
 #include "SDFSmoothUnion.h"
 #include "SphereSDF.h"
 #include "TorusSDF.h"
-#include "sdfunion.h"
 
 #include "qte.h"
 #include "implicits.h"
 #include "ui_interface.h"
 
-#define SDF_MESHING_SAMPLES 128
+#define SDF_MESHING_SAMPLES 70
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -19,6 +17,11 @@ MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 
 	// Chargement du GLWidget
 	meshWidget = new MeshWidget;
+
+    m_circle_radius_pointer = new int;
+    *m_circle_radius_pointer = 50;
+    meshWidget->SetCircleRadiusPointer(m_circle_radius_pointer);
+
 	QGridLayout* GLlayout = new QGridLayout;
 	GLlayout->addWidget(meshWidget, 0, 0);
 	GLlayout->setContentsMargins(0, 0, 0, 0);
@@ -33,6 +36,7 @@ MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 MainWindow::~MainWindow()
 {
 	delete meshWidget;
+    delete m_circle_radius_pointer;
 }
 
 void MainWindow::CreateActions()
@@ -62,20 +66,35 @@ void MainWindow::editingSceneRight(const Ray&)
 
 void MainWindow::paintErosion(const std::vector<Ray>& rays)
 {
+    auto start = std::chrono::high_resolution_clock::now();
     for (const Ray& ray : rays)
     {
-        Vector inter_point = meshColor.intersect(ray);
-        SphereSDF* new_sphere = new SphereSDF(inter_point, 0.05f);
+        Vector inter_point;
+        if (m_intersect_with_ray_marching)
+            inter_point = meshColor.intersectRayMarching(m_current_sdf, ray, 0.03f, -1);
+        else
+            inter_point = meshColor.intersect(ray);
 
-        SDFSmoothDifference* new_sdf = new SDFSmoothDifference(m_current_sdf, new_sphere);
-        m_current_sdf = new_sdf;
+        SphereSDF* new_sphere = nullptr;
+        if (inter_point != Vector::Null)
+            new_sphere = new SphereSDF(inter_point, m_erosion_sphere_radius);
+
+        if (new_sphere)
+        {
+            SDFSmoothDifference* new_sdf = new SDFSmoothDifference(m_current_sdf, new_sphere);
+            m_current_sdf = new_sdf;
+        }
     }
+    auto stop = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << " milliseconds for mesh intersection with 10 rays using " << (m_intersect_with_ray_marching ? std::string("ray marching strategy") : std::string("standard ray tracing + BVH strategy")) << std::endl;
 
 
     //Recomputing the mesh
     std::function<float(const Vector& point)> function = std::bind(&SDF::Value, m_current_sdf, std::placeholders::_1);
 
     Mesh implicitMesh;
+    implicitMesh.set_corresponding_sdf(m_current_sdf);
     AnalyticScalarField::Polygonize_from_function(function, SDF_MESHING_SAMPLES, implicitMesh, Box(6.0));
 
     std::vector<Color> cols;
@@ -132,6 +151,7 @@ void MainWindow::TestSDF()
     std::function<float(const Vector& point)> function = std::bind(&SDF::Value, m_current_sdf, std::placeholders::_1);
 
     Mesh implicitMesh;
+    implicitMesh.set_corresponding_sdf(m_current_sdf);
     AnalyticScalarField::Polygonize_from_function(function, SDF_MESHING_SAMPLES, implicitMesh, Box(6.0));
 
     std::vector<Color> cols;
@@ -167,4 +187,30 @@ void MainWindow::UpdateMaterial()
 void MainWindow::ResetCamera()
 {
 	meshWidget->SetCamera(Camera(Vector(-10.0), Vector(0.0)));
+}
+
+void MainWindow::on_erosion_sphere_radius_input_textChanged(const QString &erosion_sphere_radius_input)
+{
+    bool ok;
+    float circle_radius = erosion_sphere_radius_input.toFloat(&ok);
+
+    if (ok)
+        m_erosion_sphere_radius = circle_radius;
+}
+
+void MainWindow::on_erosion_sphere_spread_input_textChanged(const QString &sphere_spread_input)
+{
+    bool ok;
+    float sphere_spread = sphere_spread_input.toInt(&ok);
+
+    if (ok)
+        *m_circle_radius_pointer = sphere_spread;
+}
+
+void MainWindow::on_use_ray_marching_checkbox_stateChanged(int arg1)
+{
+    std::cout << "new state: " << arg1 << std::endl;
+    m_intersect_with_ray_marching = (bool)arg1;
+
+    std::cout << "m_intersect: " << m_intersect_with_ray_marching << std::endl;
 }

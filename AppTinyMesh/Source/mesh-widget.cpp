@@ -242,6 +242,10 @@ void MeshWidget::MeshGL::SetFrame(const Vector& fr)
     TRSMatrix[15] = 1.0;
 }
 
+void MeshWidget::SetCircleRadiusPointer(int* circle_radius_pointer)
+{
+    m_main_window_circle_radius = circle_radius_pointer;
+}
 
 /*!
 \brief Default constructor.
@@ -748,7 +752,7 @@ void MeshWidget::mousePressEvent(QMouseEvent* e)
 
         //Radius of the circle within which rays are going to
         //be generated. This is in pixels
-        const int CIRCLE_RADIUS = 50;
+        const int CIRCLE_RADIUS = *m_main_window_circle_radius;
 
         std::vector<Ray> rays;
         rays.reserve(NB_RAYS_TO_GENERATE);

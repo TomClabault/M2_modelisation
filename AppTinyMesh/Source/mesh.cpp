@@ -65,6 +65,11 @@ Mesh::~Mesh()
     //delete m_bvh;
 }
 
+void Mesh::set_corresponding_sdf(SDF *sdf)
+{
+    m_sdf = sdf;
+}
+
 Vector Mesh::intersect(const Ray& ray) const
 {
     HitInfo hit_info;
@@ -75,6 +80,39 @@ Vector Mesh::intersect(const Ray& ray) const
         inter_point = Vector(0, 0, 0);
 
     return inter_point;
+}
+
+Vector Mesh::intersectRayMarching(SDF* sdf, const Ray &ray, const float step_size, const int max_steps, const float max_distance_away) const
+{
+    int current_step = 0;
+    float current_distance_to_sdf = std::numeric_limits<float>::max();
+    float previous_distance_to_sdf = current_distance_to_sdf;
+    Vector current_position = ray.Origin();
+    Vector previous_position = current_position;
+    while ((current_step++ < max_steps || max_steps == -1)
+        && (current_distance_to_sdf < max_distance_away || current_distance_to_sdf == std::numeric_limits<float>::max()))
+    {
+        current_distance_to_sdf = sdf->Value(current_position);
+
+        //If we found the almost exact intersection, directly returning
+        if (std::abs(current_distance_to_sdf) < 1.0e-5f)
+            return current_position;
+
+        current_position += ray.Direction() * step_size;
+
+        //We changed sign, this means that we went through the surface
+        if (current_distance_to_sdf * previous_distance_to_sdf < 0)
+            break;
+
+        previous_distance_to_sdf = current_distance_to_sdf;
+        previous_position = current_position;
+    }
+
+    //No intersection found
+    if (current_step == max_steps + 1)
+        return Vector(0, 0, 0);
+    else
+        return (previous_position + current_position) / 2;
 }
 
 /*!

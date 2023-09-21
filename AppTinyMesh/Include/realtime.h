@@ -130,6 +130,8 @@ protected:
   Vector toAt = Vector::Null;
   int stepAt = 0;
 
+  int* m_main_window_circle_radius;
+
   // Meshes
   GLuint mainShaderProgram;
   QMap<QString, MeshGL*> objects;
@@ -162,6 +164,7 @@ public:
   void SaveScreen(int = 1280, int = 1280);
   QPoint GetMousePosition() const;
 
+  void SetCircleRadiusPointer(int* circle_radius_pointer);
   void SetMaterial(const QString&, MeshMaterial);
   void SetMaterialGlobal(MeshMaterial);
   void UseWireframe(const QString&, bool);

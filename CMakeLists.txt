@@ -51,6 +51,7 @@ set(INC_DIR AppTinyMesh/Include)
 set(GKIT_INC_DIR AppTinyMesh/Include/gKit)
 set(SDF_INC_DIR AppTinyMesh/Include/SDF)
 set(LIB_INC_DIR Libs)
+
 include_directories(${INC_DIR})
 include_directories(${LIB_INC_DIR})
 include_directories(${GKIT_INC_DIR})
@@ -65,12 +66,14 @@ if (WIN32)
     message("windows ----------------------------------------------------------------------------------------")
     add_executable(${APP} WIN32
         ${SRC_FILES}
+        ${GKIT_SRC_FILES}
+        ${SDF_SRC_FILES}
+        ${UI_FILES}
         ${INC_DIR}/box.h
         ${INC_DIR}/camera.h
         ${INC_DIR}/color.h
 
-        ${INC_DIR}/glew.h
-        ${INC_DIR}/GL.h
+        ${LIB_INC_DIR}/glew.h
         ${INC_DIR}/implicits.h
         ${INC_DIR}/mathematics.h
         ${INC_DIR}/mesh.h
