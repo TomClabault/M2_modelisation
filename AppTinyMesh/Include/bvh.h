@@ -6,7 +6,7 @@
 #include <limits>
 #include <queue>
 
-#include "AppTinyMesh/Source/triangle.h"
+#include "triangle.h"
 #include "HitInfo.h"
 #include "ray.h"
 

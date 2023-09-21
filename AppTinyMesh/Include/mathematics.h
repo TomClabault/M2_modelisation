@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AppTinyMesh/Source/gKit/vec.h"
+#include "vec.h"
 
 #include <math.h>
 #include <ostream>

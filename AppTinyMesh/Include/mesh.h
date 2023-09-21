@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AppTinyMesh/Source/bvh.h"
+#include "bvh.h"
 #include "box.h"
 #include "ray.h"
 #include "mathematics.h"

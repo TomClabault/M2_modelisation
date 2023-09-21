@@ -1,7 +1,7 @@
 #ifndef SDF_H
 #define SDF_H
 
-#include "AppTinyMesh/Source/gKit/vec.h"
+#include "vec.h"
 
 #include <functional>
 

@@ -13,7 +13,7 @@ class AnalyticScalarField
 protected:
 public:
   AnalyticScalarField();
-  AnalyticScalarField(SDF sdf);
+  //AnalyticScalarField(SDF sdf);
   virtual double Value(const Vector&) const;
   static Vector Gradient(const Vector& p, const std::function<float(const Vector& point)>& value_function);
 

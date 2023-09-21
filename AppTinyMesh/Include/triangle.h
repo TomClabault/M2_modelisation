@@ -1,7 +1,7 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include "AppTinyMesh/Source/gKit/vec.h"
+#include "vec.h"
 #include "HitInfo.h"
 #include "box.h"
 #include "ray.h"

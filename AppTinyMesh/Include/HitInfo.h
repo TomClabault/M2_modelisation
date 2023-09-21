@@ -1,7 +1,7 @@
 #ifndef HITINFO_H
 #define HITINFO_H
 
-#include "AppTinyMesh/Source/gKit/vec.h"
+#include "vec.h"
 
 class Triangle;
 

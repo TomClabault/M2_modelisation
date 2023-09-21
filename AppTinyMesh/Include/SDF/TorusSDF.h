@@ -1,7 +1,7 @@
 #ifndef TORUSSDF_H
 #define TORUSSDF_H
 
-#include "AppTinyMesh/Source/gKit/mat.h"
+#include "mat.h"
 
 #include "SDF/SDF.h"
 

@@ -4,7 +4,7 @@
 
 #include "HitInfo.h"
 #include "bvh.h"
-#include "AppTinyMesh/Source/gKit/vec.h"
+#include "vec.h"
 
 Vector BVH::BoundingVolume::PLANE_NORMALS[BVH::BoundingVolume::PLANES_COUNT] = {
     Vector(1, 0, 0),
