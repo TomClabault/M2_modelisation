@@ -5,6 +5,9 @@ greaterThan(QT_MAJOR_VERSION, 5): QT += openglwidgets
 CONFIG += c++11
 
 INCLUDEPATH += AppTinyMesh/Include
+INCLUDEPATH += AppTinyMesh/Include/SDF
+INCLUDEPATH += AppTinyMesh/Include/gKit
+INCLUDEPATH += Libs
 INCLUDEPATH += $$(GLEW_DIR)
 INCLUDEPATH += $$(OUT_PWD)
 
@@ -47,17 +50,17 @@ HEADERS += \
     AppTinyMesh/Include/qte.h \
     AppTinyMesh/Include/realtime.h \
     AppTinyMesh/Include/shader-api.h \
-    AppTinyMesh/Source/SDF/SDFDifference.h \
-    AppTinyMesh/Source/SDF/SDFIntersection.h \
-    AppTinyMesh/Source/SDF/SDFSmoothDifference.h \
-    AppTinyMesh/Source/SDF/SDFSmoothUnion.h \
-    AppTinyMesh/Source/SDF/SphereSDF.h \
-    AppTinyMesh/Source/SDF/TorusSDF.h \
-    AppTinyMesh/Source/SDF/sdfunion.h \
-    AppTinyMesh/Source/bvh.h \
-    AppTinyMesh/Source/gKit/mat.h \
-    AppTinyMesh/Source/gKit/vec.h \
-    AppTinyMesh/Source/triangle.h
+    AppTinyMesh/Include/SDF/SDFDifference.h \
+    AppTinyMesh/Include/SDF/SDFIntersection.h \
+    AppTinyMesh/Include/SDF/SDFSmoothDifference.h \
+    AppTinyMesh/Include/SDF/SDFSmoothUnion.h \
+    AppTinyMesh/Include/SDF/SphereSDF.h \
+    AppTinyMesh/Include/SDF/TorusSDF.h \
+    AppTinyMesh/Include/SDF/sdfunion.h \
+    AppTinyMesh/Include/bvh.h \
+    AppTinyMesh/Include/gKit/mat.h \
+    AppTinyMesh/Include/gKit/vec.h \
+    AppTinyMesh/Include/triangle.h
 
 FORMS += \
     AppTinyMesh/UI/interface.ui
