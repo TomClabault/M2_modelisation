@@ -8,5 +8,6 @@ AppTinyMesh/Include/ui-interface.h
 CMakeLists.txt.user
 CMakeLists.txt
 
+*.blend
 *.psd
 *.synctex.gz
