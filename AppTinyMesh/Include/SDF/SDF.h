@@ -5,6 +5,7 @@
 
 #include <functional>
 
+//TODO sans polymorphisme avec une Enum {SDFUnion, SDFIntersection, ...}
 
 class SDF
 {
