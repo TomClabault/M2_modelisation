@@ -247,6 +247,11 @@ void MeshWidget::SetCircleRadiusPointer(int* circle_radius_pointer)
     m_main_window_circle_radius = circle_radius_pointer;
 }
 
+void MeshWidget::SetErosionCountPointer(int* erosion_count_pointer)
+{
+    m_main_window_erosion_count = erosion_count_pointer;
+}
+
 /*!
 \brief Default constructor.
 */
@@ -748,7 +753,7 @@ void MeshWidget::mousePressEvent(QMouseEvent* e)
 
     if (e->modifiers() & Qt::AltModifier)
     {
-        const int NB_RAYS_TO_GENERATE = 5;
+        const int NB_RAYS_TO_GENERATE = *m_main_window_erosion_count;
 
         //Radius of the circle within which rays are going to
         //be generated. This is in pixels

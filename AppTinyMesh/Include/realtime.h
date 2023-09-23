@@ -131,6 +131,7 @@ protected:
   int stepAt = 0;
 
   int* m_main_window_circle_radius;
+  int* m_main_window_erosion_count;
 
   // Meshes
   GLuint mainShaderProgram;
@@ -165,6 +166,7 @@ public:
   QPoint GetMousePosition() const;
 
   void SetCircleRadiusPointer(int* circle_radius_pointer);
+  void SetErosionCountPointer(int* erosion_count_pointer);
   void SetMaterial(const QString&, MeshMaterial);
   void SetMaterialGlobal(MeshMaterial);
   void UseWireframe(const QString&, bool);

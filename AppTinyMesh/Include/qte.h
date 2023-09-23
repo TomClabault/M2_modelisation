@@ -18,6 +18,7 @@ private:
 
     bool m_intersect_with_ray_marching = true;
     int* m_circle_radius_pointer;
+    int* m_erosion_rays_count_pointer;
     float m_erosion_sphere_radius = 0.05;
 
     MeshWidget* meshWidget;   //!< Viewer
@@ -42,7 +43,9 @@ public slots:
 private slots:
     void on_erosion_sphere_radius_input_textChanged(const QString &arg1);
     void on_erosion_sphere_spread_input_textChanged(const QString &arg1);
+    void on_erosion_count_input_textChanged(const QString &arg1);
     void on_use_ray_marching_checkbox_stateChanged(int arg1);
+    void on_save_obj_button_clicked();
 };
 
 #endif

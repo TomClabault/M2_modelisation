@@ -8,7 +8,7 @@
 #include "implicits.h"
 #include "ui_interface.h"
 
-#define SDF_MESHING_SAMPLES 70
+#define SDF_MESHING_SAMPLES 96
 
 MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 {
@@ -19,8 +19,11 @@ MainWindow::MainWindow() : QMainWindow(), uiw(new Ui::Assets)
 	meshWidget = new MeshWidget;
 
     m_circle_radius_pointer = new int;
+    m_erosion_rays_count_pointer = new int;
     *m_circle_radius_pointer = 50;
+    *m_erosion_rays_count_pointer = 10;
     meshWidget->SetCircleRadiusPointer(m_circle_radius_pointer);
+    meshWidget->SetErosionCountPointer(m_erosion_rays_count_pointer);
 
 	QGridLayout* GLlayout = new QGridLayout;
 	GLlayout->addWidget(meshWidget, 0, 0);
@@ -87,7 +90,7 @@ void MainWindow::paintErosion(const std::vector<Ray>& rays)
     }
     auto stop = std::chrono::high_resolution_clock::now();
 
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << " milliseconds for mesh intersection with 10 rays using " << (m_intersect_with_ray_marching ? std::string("ray marching strategy") : std::string("standard ray tracing + BVH strategy")) << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << " milliseconds for mesh intersection with " << *m_erosion_rays_count_pointer << " rays using " << (m_intersect_with_ray_marching ? std::string("ray marching strategy") : std::string("standard ray tracing + BVH strategy")) << std::endl;
 
 
     //Recomputing the mesh
@@ -95,7 +98,12 @@ void MainWindow::paintErosion(const std::vector<Ray>& rays)
 
     Mesh implicitMesh;
     implicitMesh.set_corresponding_sdf(m_current_sdf);
+
+    start = std::chrono::high_resolution_clock::now();
     AnalyticScalarField::Polygonize_from_function(function, SDF_MESHING_SAMPLES, implicitMesh, Box(6.0));
+    stop = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Polygonize time: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
 
     std::vector<Color> cols;
     cols.resize(implicitMesh.Vertexes());
@@ -207,10 +215,24 @@ void MainWindow::on_erosion_sphere_spread_input_textChanged(const QString &spher
         *m_circle_radius_pointer = sphere_spread;
 }
 
+void MainWindow::on_erosion_count_input_textChanged(const QString &erosion_count_input)
+{
+    bool ok;
+    float rays_count = erosion_count_input.toInt(&ok);
+
+    if (ok)
+        *m_erosion_rays_count_pointer = rays_count;
+}
+
 void MainWindow::on_use_ray_marching_checkbox_stateChanged(int arg1)
 {
     std::cout << "new state: " << arg1 << std::endl;
     m_intersect_with_ray_marching = (bool)arg1;
 
     std::cout << "m_intersect: " << m_intersect_with_ray_marching << std::endl;
+}
+
+void MainWindow::on_save_obj_button_clicked()
+{
+    meshColor.SaveObj("saved_obj.obj", "implicit_obj");
 }
