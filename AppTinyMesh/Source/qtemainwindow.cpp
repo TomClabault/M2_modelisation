@@ -226,10 +226,7 @@ void MainWindow::on_erosion_count_input_textChanged(const QString &erosion_count
 
 void MainWindow::on_use_ray_marching_checkbox_stateChanged(int arg1)
 {
-    std::cout << "new state: " << arg1 << std::endl;
     m_intersect_with_ray_marching = (bool)arg1;
-
-    std::cout << "m_intersect: " << m_intersect_with_ray_marching << std::endl;
 }
 
 void MainWindow::on_save_obj_button_clicked()
