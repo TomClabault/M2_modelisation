@@ -1,9 +1,3 @@
-#include "SDFDifference.h"
-#include "SDFSmoothDifference.h"
-#include "SDFSmoothUnion.h"
-#include "SphereSDF.h"
-#include "TorusSDF.h"
-
 #include "qte.h"
 #include "implicits.h"
 #include "ui_interface.h"
@@ -78,13 +72,13 @@ void MainWindow::paintErosion(const std::vector<Ray>& rays)
         else
             inter_point = meshColor.intersect(ray);
 
-        SphereSDF* new_sphere = nullptr;
+        SDF* new_sphere = nullptr;
         if (inter_point != Vector::Null)
-            new_sphere = new SphereSDF(inter_point, m_erosion_sphere_radius);
+            new_sphere = SDF::create_sphere_sdf(inter_point, m_erosion_sphere_radius);
 
         if (new_sphere)
         {
-            SDFSmoothDifference* new_sdf = new SDFSmoothDifference(m_current_sdf, new_sphere);
+            SDF* new_sdf = SDF::create_smooth_difference(m_current_sdf, new_sphere, 0.3f);
             m_current_sdf = new_sdf;
         }
     }
@@ -145,16 +139,16 @@ void MainWindow::SphereImplicitExample()
 
 void MainWindow::TestSDF()
 {
-    SphereSDF* sphere1 = new SphereSDF(Vector(1, 0, 0), 2);
-    SphereSDF* sphere2 = new SphereSDF(Vector(-3, 0, 0), 2);
-    SphereSDF* sphere3 = new SphereSDF(Vector(-1, 3.6f, 0), 2);
-    TorusSDF* torus = new TorusSDF(2.0f, 0.75f, RotationX(90) * Translation(-1, 1.75, -1.25));
+    SDF* sphere1 = SDF::create_sphere_sdf(Vector(1, 0, 0), 2);
+    SDF* sphere2 = SDF::create_sphere_sdf(Vector(-3, 0, 0), 2);
+    SDF* sphere3 = SDF::create_sphere_sdf(Vector(-1, 3.6f, 0), 2);
+    SDF* torus = SDF::create_torus_sdf(2.0f, 0.75f, RotationX(90) * Translation(-1, 1.75, -1.25));
 
-    SDFSmoothUnion* sdf_two_spheres = new SDFSmoothUnion(sphere1, sphere2, 1.5f);
-    SDFSmoothUnion* three_spheres = new SDFSmoothUnion(sdf_two_spheres, sphere3, 1.0f);
+    SDF* sdf_two_spheres = SDF::create_smooth_union(sphere1, sphere2, 1.5f);
+    SDF* three_spheres = SDF::create_smooth_union(sdf_two_spheres, sphere3, 1.0f);
 
     delete m_current_sdf;
-    m_current_sdf = new SDFDifference(three_spheres, torus);
+    m_current_sdf = SDF::create_difference(three_spheres, torus);
 
     std::function<float(const Vector& point)> function = std::bind(&SDF::Value, m_current_sdf, std::placeholders::_1);
 
