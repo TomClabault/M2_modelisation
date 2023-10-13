@@ -39,6 +39,7 @@ public slots:
     void SphereImplicitExample();
     void TestSDF();
     void TestBezier();
+    void TestRevolution();
     void ResetCamera();
     void UpdateMaterial();
 private slots:

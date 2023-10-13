@@ -39,3 +39,8 @@ std::vector<Point> BezierCurve::discretize(float step)
     points.push_back(m_control_points.back());
     return points;
 }
+
+const std::vector<Point> &BezierCurve::get_control_points() const
+{
+    return m_control_points;
+}

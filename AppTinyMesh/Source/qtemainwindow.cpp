@@ -7,6 +7,7 @@
 #include "beziersurface.h"
 #include "qte.h"
 #include "implicits.h"
+#include "revolution.h"
 #include "ui_interface.h"
 
 #define SDF_MESHING_SAMPLES 96
@@ -50,6 +51,7 @@ void MainWindow::CreateActions()
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->testSDFButton, SIGNAL(clicked()), this, SLOT(TestSDF()));
     connect(uiw->testBezierButton, SIGNAL(clicked()), this, SLOT(TestBezier()));
+    connect(uiw->testRevolutionButton, SIGNAL(clicked()), this, SLOT(TestRevolution()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -176,24 +178,60 @@ void MainWindow::TestSDF()
 void MainWindow::TestBezier()
 {
     std::vector<BezierCurve> curves;
-    std::vector<Point> points1;
-    points1.push_back(Point(0, 0, 0));
-    points1.push_back(Point(1, 1, 0));
-    points1.push_back(Point(3, 1, 0));
+    std::vector<Point> points_curve_1;
+    points_curve_1.push_back(Point(0, 0, 1));
+    points_curve_1.push_back(Point(0, 1, 2));
+    points_curve_1.push_back(Point(0, 2, 3));
+    points_curve_1.push_back(Point(0, 3, 3));
+    points_curve_1.push_back(Point(0, 4, 2));
+    points_curve_1.push_back(Point(0, 5, 1));
 
-    std::vector<Point> points2;
-    points2.push_back(Point(0, 0, 1.5));
-    points2.push_back(Point(1, -1, 1.5));
-    points2.push_back(Point(3, -1, 1.5));
+    std::vector<Point> points_curve_2;
+    points_curve_2.push_back(Point(1, 0, 2));
+    points_curve_2.push_back(Point(1, 1, 3));
+    points_curve_2.push_back(Point(1, 2, 4));
+    points_curve_2.push_back(Point(1, 3, 4));
+    points_curve_2.push_back(Point(1, 4, 3));
+    points_curve_2.push_back(Point(1, 5, 2));
 
-    std::vector<Point> points3;
-    points3.push_back(Point(0, 0, 3));
-    points3.push_back(Point(1, 1, 3));
-    points3.push_back(Point(3, 1, 3));
+    std::vector<Point> points_curve_3;
+    points_curve_3.push_back(Point(2, 0, 3));
+    points_curve_3.push_back(Point(2, 1, 4));
+    points_curve_3.push_back(Point(2, 2, 5));
+    points_curve_3.push_back(Point(2, 3, 5));
+    points_curve_3.push_back(Point(2, 4, 4));
+    points_curve_3.push_back(Point(2, 5, 3));
 
-    curves.push_back(BezierCurve(points1));
-    curves.push_back(BezierCurve(points2));
-    curves.push_back(BezierCurve(points3));
+    std::vector<Point> points_curve_4;
+    points_curve_4.push_back(Point(3, 0, 3));
+    points_curve_4.push_back(Point(3, 1, 4));
+    points_curve_4.push_back(Point(3, 2, 5));
+    points_curve_4.push_back(Point(3, 3, 5));
+    points_curve_4.push_back(Point(3, 4, 4));
+    points_curve_4.push_back(Point(3, 5, 3));
+
+    std::vector<Point> points_curve_5;
+    points_curve_5.push_back(Point(4, 0, 2));
+    points_curve_5.push_back(Point(4, 1, 3));
+    points_curve_5.push_back(Point(4, 2, 4));
+    points_curve_5.push_back(Point(4, 3, 4));
+    points_curve_5.push_back(Point(4, 4, 3));
+    points_curve_5.push_back(Point(4, 5, 2));
+
+    std::vector<Point> points_curve_6;
+    points_curve_6.push_back(Point(5, 0, 1));
+    points_curve_6.push_back(Point(5, 1, 2));
+    points_curve_6.push_back(Point(5, 2, 3));
+    points_curve_6.push_back(Point(5, 3, 3));
+    points_curve_6.push_back(Point(5, 4, 2));
+    points_curve_6.push_back(Point(5, 5, 1));
+
+    curves.push_back(BezierCurve(points_curve_1));
+    curves.push_back(BezierCurve(points_curve_2));
+    curves.push_back(BezierCurve(points_curve_3));
+    curves.push_back(BezierCurve(points_curve_4));
+    curves.push_back(BezierCurve(points_curve_5));
+    curves.push_back(BezierCurve(points_curve_6));
 
     BezierSurface surface(curves);
     Mesh bezier_mesh = surface.polygonize(0.01, 0.01);
@@ -204,6 +242,28 @@ void MainWindow::TestBezier()
         cols[i] = Color(0.8, 0.8, 0.8);
 
     meshColor = MeshColor(bezier_mesh, cols, bezier_mesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::TestRevolution()
+{
+    std::vector<Point> curve_points;
+    curve_points.push_back(Point(0.5, -1, 0));
+    curve_points.push_back(Point(1.75, -1, 0));
+    curve_points.push_back(Point(0, 3.5, 0));
+    curve_points.push_back(Point(1, 3.5, 0));
+
+    BezierCurve curve(curve_points);
+    Revolution revolution(curve);
+
+    Mesh revolution_mesh = revolution.polygonize(1000, 1000, 1);
+
+    std::vector<Color> cols;
+    cols.resize(revolution_mesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(revolution_mesh, cols, revolution_mesh.VertexIndexes());
     UpdateGeometry();
 }
 

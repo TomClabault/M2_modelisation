@@ -14,6 +14,8 @@ public:
     Point evaluate(float u);
     std::vector<Point> discretize(float step);
 
+    const std::vector<Point>& get_control_points() const;
+
 private:
     std::vector<Point> m_control_points;
 };
