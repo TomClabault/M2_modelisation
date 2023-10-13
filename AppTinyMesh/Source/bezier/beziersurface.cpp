@@ -12,23 +12,22 @@ Mesh BezierSurface::polygonize(float step_u, float step_v)
     std::vector<Vector> points;
     std::vector<int> triangles_indices;
 
+    int nb_points_along_u = 1.0f / step_u + 1;
     int nb_points_along_v = 1.0f / step_v + 1;
 
-    int u_index = 0;
     float u = 0.0f;
-    while (u <= 1.0f)
+    for (int u_index = 0; u_index < nb_points_along_u; u_index++, u += step_u)
     {
+        u = std::min(1.0f, u);
+
         std::vector<Point> curve_along_v_control_points;
         for (BezierCurve& curve : m_control_curves)
             curve_along_v_control_points.push_back(curve.evaluate(u));
 
-        //int v_index = 0;
         float v = 0.0f;
         for (int v_index = 0; v_index < nb_points_along_v; v_index++, v += step_v)
         {
             v = std::min(1.0f, v);
-        //while (v <= 1.0f)
-        //{
             BezierCurve curve_along_v(curve_along_v_control_points);
             Vector new_point = Vector(curve_along_v.evaluate(v));
 
@@ -102,13 +101,7 @@ Mesh BezierSurface::polygonize(float step_u, float step_v)
                     normals_indices.push_back(normals.size() - 1);
                 }
             }
-
-            //v_index++;
-            //v += step_v;
         }
-
-        u_index++;
-        u += step_u;
     }
 
     return Mesh(points, normals, triangles_indices, normals_indices);

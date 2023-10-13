@@ -183,8 +183,8 @@ void MainWindow::TestBezier()
 
     std::vector<Point> points2;
     points2.push_back(Point(0, 0, 1.5));
-    points2.push_back(Point(1, 1, 1.5));
-    points2.push_back(Point(3, 1, 1.5));
+    points2.push_back(Point(1, -1, 1.5));
+    points2.push_back(Point(3, -1, 1.5));
 
     std::vector<Point> points3;
     points3.push_back(Point(0, 0, 3));
@@ -196,7 +196,7 @@ void MainWindow::TestBezier()
     curves.push_back(BezierCurve(points3));
 
     BezierSurface surface(curves);
-    Mesh bezier_mesh = surface.polygonize(0.1, 0.1);
+    Mesh bezier_mesh = surface.polygonize(0.01, 0.01);
 
     std::vector<Color> cols;
     cols.resize(bezier_mesh.Vertexes());
