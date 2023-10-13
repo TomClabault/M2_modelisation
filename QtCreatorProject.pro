@@ -6,6 +6,7 @@ CONFIG += c++11
 
 INCLUDEPATH += AppTinyMesh/Include
 INCLUDEPATH += AppTinyMesh/Include/SDF
+INCLUDEPATH += AppTinyMesh/Include/bezier
 INCLUDEPATH += AppTinyMesh/Include/gKit
 INCLUDEPATH += Libs
 INCLUDEPATH += $$(GLEW_DIR)
@@ -21,6 +22,8 @@ SOURCES += \
     AppTinyMesh/Source/SDF/SphereSDF.cpp \
     AppTinyMesh/Source/SDF/TorusSDF.cpp \
     AppTinyMesh/Source/SDF/sdfunion.cpp \
+    AppTinyMesh/Source/bezier/beziercurve.cpp \
+    AppTinyMesh/Source/bezier/beziersurface.cpp \
     AppTinyMesh/Source/box.cpp \
     AppTinyMesh/Source/bvh.cpp \
     AppTinyMesh/Source/evector.cpp \
@@ -57,6 +60,8 @@ HEADERS += \
     AppTinyMesh/Include/SDF/SphereSDF.h \
     AppTinyMesh/Include/SDF/TorusSDF.h \
     AppTinyMesh/Include/SDF/sdfunion.h \
+    AppTinyMesh/Include/bezier/beziercurve.h \
+    AppTinyMesh/Include/bezier/beziersurface.h \
     AppTinyMesh/Include/bvh.h \
     AppTinyMesh/Include/gKit/mat.h \
     AppTinyMesh/Include/gKit/vec.h \

@@ -1,13 +1,16 @@
 \begin{figure}[h!]
-	\adjustbox{center}{\includegraphics[width=1.2\textwidth]{Captures/Rendu.jpg}}
+	\adjustbox{center}{\includegraphics[width=1.2\textwidth]{Captures/DisplayFinal.jpg}}
 
 	\caption{Rendu Blender d'une surface implicite modélisée et maillée avec TinyMesh}
+	\label{ref}
 \end{figure}
 \FloatBarrier
 
-La modélisation par surface implicite permet la création de modèles très complexes mais le temps nécessaire ou maillage (ou au rendu par ray-marching) du modèle
-dépend directement de la complexité du modèles / de l'arbre de construction. Pour ce TP, le plus gros consommateur de temps de calcul est l'outil d'érosion qui rajoute 
-10 unions de sphères (ou plus) à la SDF. Chaque appel à la fonction \textit{Value()} de la SDF doit alors prendre en compte toutes ces nouvelles sphères.
+Les opérateurs binaires de modélisation ont été implémentés au moyen de 7 classes, d'héritage de fonctions virtuelles en C++.
+
+La \figurename 1 montre les intéractions possibles avec différents opérateurs binaires de modélisation. Le temps nécessaire ou maillage (ou au rendu par ray-marching) du modèle
+dépend directement de la complexité de l'arbre de construction. Pour cet exemple, le plus gros consommateur de temps de calcul est l'outil d'érosion qui peut rajouter jusqu'à
+100 différences de sphères à la SDF à chaque clic. Chaque appel à la fonction \textit{Value()} de la SDF doit alors prendre en compte toutes ces nouvelles sphères.
 
 \begin{figure}[h!]
 	\adjustbox{center}{\includegraphics[width=0.8\textwidth]{Benchmark/remesh.png}}
@@ -22,5 +25,5 @@ L'outil d'érosion a été implémenté grâce à un algorithme de ray marching.
 et on rajoute des différences de sphère à la SDF aux points d'intersection. 
 
 L'algorithme de ray marching faisant appel à la fonction \textit{Value()} de la SDF, il est de moins
-en moins efficace (linéairement) au fur et à mesure que la SDF se complexifie. Un lancer de rayons + BVH sur le maillage de la surface implicite se révèle être 3 ordres de grandeur
-plus rapide mais cela nécessite cependant d'avoir maillé la surface implicite au préalable.
+en moins efficace (linéairement) au fur et à mesure que la SDF se complexifie. Un lancer de rayons classique + BVH sur le maillage de la surface implicite se révèle être 3 
+ordres de grandeur plus rapide mais cela nécessite cependant d'avoir maillé la surface implicite au préalable.

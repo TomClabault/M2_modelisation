@@ -4,6 +4,7 @@
 #include "SphereSDF.h"
 #include "TorusSDF.h"
 
+#include "beziersurface.h"
 #include "qte.h"
 #include "implicits.h"
 #include "ui_interface.h"
@@ -48,6 +49,7 @@ void MainWindow::CreateActions()
     connect(uiw->boxMesh, SIGNAL(clicked()), this, SLOT(BoxMeshExample()));
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->testSDFButton, SIGNAL(clicked()), this, SLOT(TestSDF()));
+    connect(uiw->testBezierButton, SIGNAL(clicked()), this, SLOT(TestBezier()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -168,6 +170,40 @@ void MainWindow::TestSDF()
         cols[i] = Color(0.8, 0.8, 0.8);
 
     meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::TestBezier()
+{
+    std::vector<BezierCurve> curves;
+    std::vector<Point> points1;
+    points1.push_back(Point(0, 0, 0));
+    points1.push_back(Point(1, 1, 0));
+    points1.push_back(Point(3, 1, 0));
+
+    std::vector<Point> points2;
+    points2.push_back(Point(0, 0, 1.5));
+    points2.push_back(Point(1, 1, 1.5));
+    points2.push_back(Point(3, 1, 1.5));
+
+    std::vector<Point> points3;
+    points3.push_back(Point(0, 0, 3));
+    points3.push_back(Point(1, 1, 3));
+    points3.push_back(Point(3, 1, 3));
+
+    curves.push_back(BezierCurve(points1));
+    curves.push_back(BezierCurve(points2));
+    curves.push_back(BezierCurve(points3));
+
+    BezierSurface surface(curves);
+    Mesh bezier_mesh = surface.polygonize(0.1, 0.1);
+
+    std::vector<Color> cols;
+    cols.resize(bezier_mesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    meshColor = MeshColor(bezier_mesh, cols, bezier_mesh.VertexIndexes());
     UpdateGeometry();
 }
 
