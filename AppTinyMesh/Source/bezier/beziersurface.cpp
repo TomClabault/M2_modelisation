@@ -5,8 +5,6 @@
 
 Mesh BezierSurface::polygonize(float step_u, float step_v)
 {
-    Mesh out_mesh;
-
     std::vector<Vector> normals;
     std::vector<int> normals_indices;
     std::vector<Vector> points;

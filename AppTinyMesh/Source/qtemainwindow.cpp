@@ -234,12 +234,23 @@ void MainWindow::TestBezier()
     curves.push_back(BezierCurve(points_curve_6));
 
     BezierSurface surface(curves);
+    auto start = std::chrono::high_resolution_clock::now();
     Mesh bezier_mesh = surface.polygonize(0.01, 0.01);
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Mesh time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << " microseconds" << std::endl;
 
     std::vector<Color> cols;
     cols.resize(bezier_mesh.Vertexes());
     for (size_t i = 0; i < cols.size(); i++)
         cols[i] = Color(0.8, 0.8, 0.8);
+
+    //bezier_mesh.twist(10.0f, 1);
+    start = std::chrono::high_resolution_clock::now();
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 2, 1.0f, Vector(0, 0, 1));
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 2, 1.1f, Vector(0.75, 0, 0));
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 5, 0.5f, Vector(0, 0, 0.5));
+    stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Deformations time: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << "ms" << std::endl;
 
     meshColor = MeshColor(bezier_mesh, cols, bezier_mesh.VertexIndexes());
     UpdateGeometry();
@@ -256,12 +267,24 @@ void MainWindow::TestRevolution()
     BezierCurve curve(curve_points);
     Revolution revolution(curve);
 
-    Mesh revolution_mesh = revolution.polygonize(1000, 1000, 1);
+    Mesh revolution_mesh = revolution.polygonize(200, 200, 1);
 
     std::vector<Color> cols;
     cols.resize(revolution_mesh.Vertexes());
     for (size_t i = 0; i < cols.size(); i++)
         cols[i] = Color(0.8, 0.8, 0.8);
+
+
+    //revolution_mesh.Load("cube_high.obj");
+    Vector min_vec = Vector(std::numeric_limits<float>::max()), max_vec = Vector(std::numeric_limits<float>::min());
+    for (int i = 0; i < revolution_mesh.Vertexes(); i++)
+    {
+        min_vec = min(min_vec, revolution_mesh.Vertex(i));
+        max_vec = max(max_vec, revolution_mesh.Vertex(i));
+    }
+
+    std::cout << "min, max: " << min_vec << ", " << max_vec << std::endl;
+    revolution_mesh.twist(10, 1);
 
     meshColor = MeshColor(revolution_mesh, cols, revolution_mesh.VertexIndexes());
     UpdateGeometry();
