@@ -71,6 +71,8 @@ public:
     int VertexIndex(int, int) const;
     int NormalIndex(int, int) const;
 
+    void twist(float rotation_extent = 1.0f, int twist_axis = 0);
+    void local_attenuated_translation(const int vertex_index_center_of_deformation, float deformation_scale, const Vector& translation);
     Vector intersect(const Ray& ray) const;
     Vector intersectRayMarching(SDF* sdf, const Ray& ray, const float step_size = 0.03f, const int max_steps = 500, const float distance_to_stop = 100) const;
 

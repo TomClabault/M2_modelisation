@@ -4,8 +4,10 @@
 #include "SphereSDF.h"
 #include "TorusSDF.h"
 
+#include "beziersurface.h"
 #include "qte.h"
 #include "implicits.h"
+#include "revolution.h"
 #include "ui_interface.h"
 
 #define SDF_MESHING_SAMPLES 96
@@ -48,6 +50,8 @@ void MainWindow::CreateActions()
     connect(uiw->boxMesh, SIGNAL(clicked()), this, SLOT(BoxMeshExample()));
     connect(uiw->sphereImplicit, SIGNAL(clicked()), this, SLOT(SphereImplicitExample()));
     connect(uiw->testSDFButton, SIGNAL(clicked()), this, SLOT(TestSDF()));
+    connect(uiw->testBezierButton, SIGNAL(clicked()), this, SLOT(TestBezier()));
+    connect(uiw->testRevolutionButton, SIGNAL(clicked()), this, SLOT(TestRevolution()));
     connect(uiw->resetcameraButton, SIGNAL(clicked()), this, SLOT(ResetCamera()));
     connect(uiw->wireframe, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
     connect(uiw->radioShadingButton_1, SIGNAL(clicked()), this, SLOT(UpdateMaterial()));
@@ -168,6 +172,121 @@ void MainWindow::TestSDF()
         cols[i] = Color(0.8, 0.8, 0.8);
 
     meshColor = MeshColor(implicitMesh, cols, implicitMesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::TestBezier()
+{
+    std::vector<BezierCurve> curves;
+    std::vector<Point> points_curve_1;
+    points_curve_1.push_back(Point(0, 0, 1));
+    points_curve_1.push_back(Point(0, 1, 2));
+    points_curve_1.push_back(Point(0, 2, 3));
+    points_curve_1.push_back(Point(0, 3, 3));
+    points_curve_1.push_back(Point(0, 4, 2));
+    points_curve_1.push_back(Point(0, 5, 1));
+
+    std::vector<Point> points_curve_2;
+    points_curve_2.push_back(Point(1, 0, 2));
+    points_curve_2.push_back(Point(1, 1, 3));
+    points_curve_2.push_back(Point(1, 2, 4));
+    points_curve_2.push_back(Point(1, 3, 4));
+    points_curve_2.push_back(Point(1, 4, 3));
+    points_curve_2.push_back(Point(1, 5, 2));
+
+    std::vector<Point> points_curve_3;
+    points_curve_3.push_back(Point(2, 0, 3));
+    points_curve_3.push_back(Point(2, 1, 4));
+    points_curve_3.push_back(Point(2, 2, 5));
+    points_curve_3.push_back(Point(2, 3, 5));
+    points_curve_3.push_back(Point(2, 4, 4));
+    points_curve_3.push_back(Point(2, 5, 3));
+
+    std::vector<Point> points_curve_4;
+    points_curve_4.push_back(Point(3, 0, 3));
+    points_curve_4.push_back(Point(3, 1, 4));
+    points_curve_4.push_back(Point(3, 2, 5));
+    points_curve_4.push_back(Point(3, 3, 5));
+    points_curve_4.push_back(Point(3, 4, 4));
+    points_curve_4.push_back(Point(3, 5, 3));
+
+    std::vector<Point> points_curve_5;
+    points_curve_5.push_back(Point(4, 0, 2));
+    points_curve_5.push_back(Point(4, 1, 3));
+    points_curve_5.push_back(Point(4, 2, 4));
+    points_curve_5.push_back(Point(4, 3, 4));
+    points_curve_5.push_back(Point(4, 4, 3));
+    points_curve_5.push_back(Point(4, 5, 2));
+
+    std::vector<Point> points_curve_6;
+    points_curve_6.push_back(Point(5, 0, 1));
+    points_curve_6.push_back(Point(5, 1, 2));
+    points_curve_6.push_back(Point(5, 2, 3));
+    points_curve_6.push_back(Point(5, 3, 3));
+    points_curve_6.push_back(Point(5, 4, 2));
+    points_curve_6.push_back(Point(5, 5, 1));
+
+    curves.push_back(BezierCurve(points_curve_1));
+    curves.push_back(BezierCurve(points_curve_2));
+    curves.push_back(BezierCurve(points_curve_3));
+    curves.push_back(BezierCurve(points_curve_4));
+    curves.push_back(BezierCurve(points_curve_5));
+    curves.push_back(BezierCurve(points_curve_6));
+
+    BezierSurface surface(curves);
+    auto start = std::chrono::high_resolution_clock::now();
+    Mesh bezier_mesh = surface.polygonize(0.01, 0.01);
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Mesh time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << " microseconds" << std::endl;
+
+    std::vector<Color> cols;
+    cols.resize(bezier_mesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+    //bezier_mesh.twist(10.0f, 1);
+    start = std::chrono::high_resolution_clock::now();
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 2, 1.0f, Vector(0, 0, 1));
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 2, 1.1f, Vector(0.75, 0, 0));
+    bezier_mesh.local_attenuated_translation(bezier_mesh.Vertexes() / 5, 0.5f, Vector(0, 0, 0.5));
+    stop = std::chrono::high_resolution_clock::now();
+    std::cout << "Deformations time: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << "ms" << std::endl;
+
+    meshColor = MeshColor(bezier_mesh, cols, bezier_mesh.VertexIndexes());
+    UpdateGeometry();
+}
+
+void MainWindow::TestRevolution()
+{
+    std::vector<Point> curve_points;
+    curve_points.push_back(Point(0.5, -1, 0));
+    curve_points.push_back(Point(1.75, -1, 0));
+    curve_points.push_back(Point(0, 3.5, 0));
+    curve_points.push_back(Point(1, 3.5, 0));
+
+    BezierCurve curve(curve_points);
+    Revolution revolution(curve);
+
+    Mesh revolution_mesh = revolution.polygonize(200, 200, 1);
+
+    std::vector<Color> cols;
+    cols.resize(revolution_mesh.Vertexes());
+    for (size_t i = 0; i < cols.size(); i++)
+        cols[i] = Color(0.8, 0.8, 0.8);
+
+
+    //revolution_mesh.Load("cube_high.obj");
+    Vector min_vec = Vector(std::numeric_limits<float>::max()), max_vec = Vector(std::numeric_limits<float>::min());
+    for (int i = 0; i < revolution_mesh.Vertexes(); i++)
+    {
+        min_vec = min(min_vec, revolution_mesh.Vertex(i));
+        max_vec = max(max_vec, revolution_mesh.Vertex(i));
+    }
+
+    std::cout << "min, max: " << min_vec << ", " << max_vec << std::endl;
+    revolution_mesh.twist(10, 1);
+
+    meshColor = MeshColor(revolution_mesh, cols, revolution_mesh.VertexIndexes());
     UpdateGeometry();
 }
 

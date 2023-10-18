@@ -38,6 +38,8 @@ public slots:
     void BoxMeshExample();
     void SphereImplicitExample();
     void TestSDF();
+    void TestBezier();
+    void TestRevolution();
     void ResetCamera();
     void UpdateMaterial();
 private slots:

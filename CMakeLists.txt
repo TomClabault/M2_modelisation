@@ -42,32 +42,44 @@ endif()
 # ------------------------------------------------------------------------------
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(APP AppTinyMesh)
-set(UI_DIR AppTinyMesh/Ui)
+set(UI_DIR AppTinyMesh/UI)
 set(SRC_DIR AppTinyMesh/Source)
 set(GKIT_SRC_DIR AppTinyMesh/Source/gKit)
 set(SDF_SRC_DIR AppTinyMesh/Source/SDF)
+set(BEZIER_SRC_DIR AppTinyMesh/Source/bezier)
 
 set(INC_DIR AppTinyMesh/Include)
 set(GKIT_INC_DIR AppTinyMesh/Include/gKit)
 set(SDF_INC_DIR AppTinyMesh/Include/SDF)
+set(BEZIER_INC_DIR AppTinyMesh/Include/bezier)
 set(LIB_INC_DIR Libs)
 
 include_directories(${INC_DIR})
 include_directories(${LIB_INC_DIR})
 include_directories(${GKIT_INC_DIR})
 include_directories(${SDF_INC_DIR})
+include_directories(${BEZIER_INC_DIR})
 
 aux_source_directory(${SRC_DIR} SRC_FILES)
 aux_source_directory(${GKIT_SRC_DIR} GKIT_SRC_FILES)
 aux_source_directory(${SDF_SRC_DIR} SDF_SRC_FILES)
+aux_source_directory(${BEZIER_SRC_DIR} BEZIER_SRC_FILES)
 aux_source_directory(${UI_DIR} UI_FILES)
 
+file(GLOB UI_FILES "${UI_DIR}/*.ui")
+
+message(${UI_FILES})
+
+qt_wrap_ui(WRAPPED_UI_FILES ${UI_FILES})
+
+message(${WRAPPED_UI_FILES})
+
 if (WIN32)
-    message("windows ----------------------------------------------------------------------------------------")
     add_executable(${APP} WIN32
         ${SRC_FILES}
         ${GKIT_SRC_FILES}
         ${SDF_SRC_FILES}
+        ${BEZIER_SRC_FILES}
         ${UI_FILES}
         ${INC_DIR}/box.h
         ${INC_DIR}/camera.h
@@ -88,7 +100,8 @@ else() #Linux
         ${SRC_FILES}
         ${GKIT_SRC_FILES}
         ${SDF_SRC_FILES}
-        ${UI_FILES}
+        ${BEZIER_SRC_FILES}
+        ${WRAPPED_UI_FILES}
         ${INC_DIR}/box.h
         ${INC_DIR}/camera.h
         ${INC_DIR}/color.h

@@ -1,5 +1,7 @@
 #include "mesh.h"
 
+#include "mat.h"
+
 /*!
 \class Mesh mesh.h
 
@@ -68,6 +70,53 @@ Mesh::~Mesh()
 void Mesh::set_corresponding_sdf(SDF *sdf)
 {
     m_sdf = sdf;
+}
+
+void Mesh::twist(float rotation_extent, int twist_axis)
+{
+    for (Vector& vertex : m_vertices)
+    {
+        Transform rotation;
+        float intensity = vertex[twist_axis] - (int)(vertex[twist_axis] / rotation_extent) * rotation_extent;
+        float angle = 360.0f / rotation_extent * intensity;
+
+        switch (twist_axis)
+        {
+        case 0:
+            rotation = RotationX(angle);
+            break;
+
+        case 1:
+            rotation = RotationY(angle);
+            break;
+
+        case 2:
+            rotation = RotationZ(angle);
+            break;
+        }
+
+        vertex = Vector(rotation(Point(vertex)));
+    }
+}
+
+void Mesh::local_attenuated_translation(const int vertex_index_center_of_deformation, float deformation_radius, const Vector& translation)
+{
+    Vector center_vertex = m_vertices[vertex_index_center_of_deformation];
+
+    float deformation_radius_squared = deformation_radius * deformation_radius;
+    int debug_index = 0;
+    for (Vector& vertex : m_vertices)
+    {
+        float distance_squared = SquaredNorm(vertex - center_vertex);
+
+        //Attenuation is going to be 0 if we're outside of the deformation distance
+        float x = 1.0f - std::min(1.0f, distance_squared / deformation_radius_squared);
+        float strength = x * x * (3.0f - 2*x);
+
+        vertex = vertex + translation * strength;
+
+        debug_index++;
+    }
 }
 
 Vector Mesh::intersect(const Ray& ray) const
