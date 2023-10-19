@@ -103,11 +103,11 @@ void Mesh::local_attenuated_translation(const int vertex_index_center_of_deforma
 {
     Vector center_vertex = m_vertices[vertex_index_center_of_deformation];
 
-    float deformation_radius_squared = deformation_radius * deformation_radius;
+    float deformation_radius_squared = deformation_radius;// * deformation_radius;
     int debug_index = 0;
     for (Vector& vertex : m_vertices)
     {
-        float distance_squared = SquaredNorm(vertex - center_vertex);
+        float distance_squared = Norm(vertex - center_vertex);
 
         //Attenuation is going to be 0 if we're outside of the deformation distance
         float x = 1.0f - std::min(1.0f, distance_squared / deformation_radius_squared);
