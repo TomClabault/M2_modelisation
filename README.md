@@ -16,4 +16,4 @@ Implemented features:
 
 - Revolution surfaces using a Bezier curve as the revolution profile
 - Mesh twisting operator
-![mesh revolution & twist](data/img/torsion.jpg)
+![mesh revolution & twist](data/img/twist.jpg)
