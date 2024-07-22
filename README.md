@@ -1,38 +1,19 @@
-## Windows
-- First, you must install Qt6 (https://www.qt.io/download, use the open source version). Install the msvc2019_64 compiler only (*Note: other compilers can work too*).
-- Set the "QTDIR64" environment variable to your Qt installation folder (example: "E:\Code\Qt\6.3.0\msvc2019_64")
-- Set the "GLEW_DIR" environment variable to the path "XXX/TinyMesh/Libs/", with XXX the path to your repository.
-- Run the script TinyMesh/Script/AppTinyMeshDeploy.bat
+This project implements the representation of implicit surfaces using SDFs  and their meshing using a marching cube algorithm. Some boolean operators are also defined on the SDFs (union, smooth union, intersection, difference, ...).
+Signed distance functions are very powerful tools (cf. [Inigo Quilez' Shadertoy profile](https://www.shadertoy.com/user/iq)).
+This project also implements revolution surfaces, generation of a mesh from a Bezier surface description and mesh local deformations.
 
-Finally, open the Visual Studio solution files with Visual Studio 2022 Community, or open the QtCreatorProject.pro with QtCreator. Compile/Build and execute, everything should work.
-*Note: For other IDE, you will have to use the provided CMakeLists.txt to generate the solution files yourself.*
+Implemented features:
+- Signed distance functions
+- Boolean operators on SDFs (union, smooth union, intersection, difference, ...)
+- Ray marching algorithm for meshing an SDF
 
-## Linux
-- First, you must install Qt6 (https://www.qt.io/download, use the open source version). Install the gcc compiler only (*Note: other compilers can work too*).
-- Install the following packages
-```
-sudo apt-get install g++ libglew-dev freeglut3-dev
-```
-Finally, open the QtCreatorProject.pro with QtCreator. Click on configure, then build and execute, everything should work.
-*Note: For other IDE, you will have to use the provided CMakeLists.txt to generate the solution files yourself.*
+![SDF](data/img/SDF_to_the_right.jpg)
 
-## Mac OS/X
-- First, you must install Qt6 (https://www.qt.io/download, use the open source version). Install the gcc compiler only (*Note: other compilers can work too*).
--  Install the following packages (*Note: Depending on your Mac OS/X version, other packages might be needed. Shoot me an email if anything is missing.*
-```
-brew install glew
-```
-Finally, open the QtCreatorProject.pro with QtCreator. Click on configure, then build and execute, everything should work.
-*Note: For other IDE, you will have to use the provided CMakeLists.txt to generate the solution files yourself.*
+- Meshing of a Bezier surface with arbitrary precision
+- Local deformation of a mesh
+![Bezier surfaces](data/img/Bezier.jpg)
 
-## Additional notes
-Optionally, you can use your own code (without Qt) to do the windowing and rendering part. In this case, you can extract the following files, which don't have any dependencies apart from the C++ standard library:
- - box.h/.cpp
- - camera.h/.cpp
- - color.h
- - implicits.h/.cpp
- - mathematics.h
- - mesh.h/.cpp (*You must remove the Mesh::LoadObj and Mesh::SaveObj functions, which depends on Qt*)
- - meshcolor.h/.cpp
- - ray.h/.cpp
 
+- Revolution surfaces using a Bezier curve as the revolution profile
+- Mesh twisting operator
+![mesh revolution & twist](data/img/torsion.jpg)
